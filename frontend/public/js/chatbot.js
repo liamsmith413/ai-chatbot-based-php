@@ -13,11 +13,15 @@
         if (window.location.hostname.includes('github.dev') || 
             window.location.hostname.includes('codespaces') || 
             window.location.hostname.includes('githubusercontent')) {
-            // Extract the Codespace domain and port
-            const protocol = window.location.protocol;
-            const hostname = window.location.hostname;
-            // Return URL that points to port 8000 on the same hostname
-            return `${protocol}//${hostname}:8000`;
+            
+            // Extract the codespace domain base (remove port if present)
+            const codespaceUrl = window.location.hostname.split('-')[0];
+            const domain = window.location.hostname.substring(codespaceUrl.length + 1);
+            
+            // For GitHub Codespaces, we need to use the same domain but different port (8000)
+            // Replace the port number in the URL (from 8080 to 8000)
+            const baseUrl = window.location.origin;
+            return baseUrl.replace('-8080', '-8000');
         }
         
         // Default for local development
@@ -50,9 +54,16 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            mode: 'cors',  // Explicitly set CORS mode
+            credentials: 'same-origin'
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             conversationId = data.conversation_id;
             currentStep = data.current_step;
@@ -178,9 +189,16 @@
             headers: {
                 'Content-Type': 'application/json'
             },
+            mode: 'cors',  // Explicitly set CORS mode
+            credentials: 'same-origin',
             body: JSON.stringify(payload)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             // Hide typing indicator
             hideTypingIndicator();
@@ -227,11 +245,18 @@
             headers: {
                 'Content-Type': 'application/json'
             },
+            mode: 'cors',  // Explicitly set CORS mode
+            credentials: 'same-origin',
             body: JSON.stringify({
                 conversation_id: conversationId
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             // Hide typing indicator
             hideTypingIndicator();
