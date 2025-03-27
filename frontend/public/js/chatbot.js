@@ -3,7 +3,26 @@
  */
 (function() {
     // API Configuration
-    const API_BASE_URL = 'http://localhost:8000'; // Update with actual API URL in production
+    const API_BASE_URL = getApiBaseUrl();
+    
+    /**
+     * Determine the appropriate API base URL based on the environment
+     */
+    function getApiBaseUrl() {
+        // Check if running in GitHub Codespaces
+        if (window.location.hostname.includes('github.dev') || 
+            window.location.hostname.includes('codespaces') || 
+            window.location.hostname.includes('githubusercontent')) {
+            // Extract the Codespace domain and port
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            // Return URL that points to port 8000 on the same hostname
+            return `${protocol}//${hostname}:8000`;
+        }
+        
+        // Default for local development
+        return 'http://localhost:8000';
+    }
     
     // Chatbot state
     let conversationId = null;
